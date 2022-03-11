@@ -1,5 +1,5 @@
 ## Configuration for a CI Fuzz project
-## Generated on 2022-03-04 with CI Fuzz 2.29.3+yandex
+## Generated on 2022-03-11 with CI Fuzz 2.29.3+yandex
 ##
 ## Lines that start with "##" are explanations for the following
 ## setting, lines that start with "#" are settings that can be enabled
@@ -35,7 +35,8 @@ run_container: "cifuzz/fuzzopenntpd:latest"
 ## The path must be relative to the root of the project directory.
 build_script: ".code-intelligence/build.sh"
 
-
+compiler_extra_args:
+  - "-fPIC"
 
 ## Paths to the fuzz targets to execute.
 fuzz_tests:
