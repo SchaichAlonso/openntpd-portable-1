@@ -1,2 +1,10 @@
 FROM cifuzz/builders:zint
 RUN cat /etc/*release && apt-get update && apt-get -y install automake autoconf git libtool bison
+
+COPY ./ntpd.conf /usr/local/etc/ntpd.conf
+RUN groupadd _ntp
+RUN useradd -g _ntp -s /sbin/nologin -d /var/empty -c 'OpenNTP daemon' _ntp
+RUN mkdir -p /var/empty
+RUN chown 0 /var/empty
+RUN chgrp 0 /var/empty
+RUN chmod 0755 /var/empty
