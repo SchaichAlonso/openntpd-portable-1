@@ -4,6 +4,7 @@ if test $BUILDPROJECT = 1
 then
     ./autogen.sh
     ./configure
+    cp .code-intelligence/server.c src/server.c
     make clean
     make -j$(nproc)
 fi

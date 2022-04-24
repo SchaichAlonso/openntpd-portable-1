@@ -1,0 +1,5 @@
+{
+  "port_number": 123,
+  "target_library": "./src/libFuzzCIntpd.so",
+  "protocol": 1
+}
