@@ -5,6 +5,7 @@ then
     ./autogen.sh
     ./configure
     cp .code-intelligence/server.c src/server.c
+    cp .code-intelligence/util.c src/util.c
     make clean
     make -j$(nproc)
 fi
