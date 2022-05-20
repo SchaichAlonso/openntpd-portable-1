@@ -1,5 +1,5 @@
 set -e
-BUILDPROJECT=1
+BUILDPROJECT=0
 if test $BUILDPROJECT = 1
 then
     ./autogen.sh

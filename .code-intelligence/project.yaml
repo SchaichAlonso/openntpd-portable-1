@@ -1,5 +1,5 @@
 ## Configuration for a CI Fuzz project
-## Generated on 2022-04-22 with CI Fuzz 2.30.5
+## Generated on 2022-05-20 with CI Fuzz 2.32.1
 ##
 ## Lines that start with "##" are explanations for the following
 ## setting, lines that start with "#" are settings that can be enabled
@@ -40,8 +40,10 @@ compiler_extra_args:
 
 ## Paths to the fuzz targets to execute.
 fuzz_tests:
+  - .code-intelligence/fuzz_targets/plain_c_target.c
   - .code-intelligence/fuzz_targets/udp_fuzzer.cpp
   - .code-intelligence/fuzz_targets/useless_fuzz_target.cpp
+  - .code-intelligence/fuzz_targets/parse_config_fuzzer.cpp
 
 ## Go packages containing fuzz targets. A fuzzer is created
 ## for each function starting with "Fuzz"
