@@ -6,6 +6,9 @@ then
     ./configure
     cp .code-intelligence/server.c src/server.c
     cp .code-intelligence/util.c src/util.c
+    cp .code-intelligence/ntpd.c src/ntpd.c
+    cp .code-intelligence/ntp.c src/ntp.c
+    cp .code-intelligence/ntp_dns.c src/ntp_dns.c
     make clean
     make -j$(nproc)
 fi
