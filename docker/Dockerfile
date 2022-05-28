@@ -1,6 +1,6 @@
 FROM cifuzz/builder-c:1.1
 ENV TZ=Europe/Berlin
-RUN cat /etc/*release && apt-get update && apt-get -y install automake autoconf git libtool bison tzdata nscd
+RUN cat /etc/*release && apt-get update && apt-get -y install automake autoconf git libtool bison tzdata nscd gdb gdbserver nano
 
 COPY ./ntpd.conf /usr/local/etc/ntpd.conf
 RUN groupadd _ntp
@@ -10,4 +10,4 @@ RUN chown 0 /var/empty
 RUN chgrp 0 /var/empty
 RUN chmod 0755 /var/empty
 
-RUN mkdir mkdir -p /usr/local/var/run
+RUN mkdir -p /usr/local/var/run
