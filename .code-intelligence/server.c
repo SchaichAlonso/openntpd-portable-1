@@ -181,7 +181,7 @@ server_dispatch(int fd, struct ntpd_conf *lconf)
 	socklen_t		 fsa_len;
 	struct ntp_msg		 query, reply;
 	char			 buf[NTP_MSGSIZE];
-
+    //printf("server_dispatch is called.\n");
 	fsa_len = sizeof(fsa);
 	if ((size = recvfrom(fd, &buf, sizeof(buf), 0,
 	    (struct sockaddr *)&fsa, &fsa_len)) == -1) {
