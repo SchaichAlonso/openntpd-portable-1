@@ -1,5 +1,5 @@
 ## Configuration for a CI Fuzz project
-## Generated on 2022-04-22 with CI Fuzz 2.30.5
+## Generated on 2022-04-25 with CI Fuzz 2.31.0
 ##
 ## Lines that start with "##" are explanations for the following
 ## setting, lines that start with "#" are settings that can be enabled
@@ -37,6 +37,8 @@ build_script: ".code-intelligence/build.sh"
 
 compiler_extra_args:
   - "-fPIC"
+  - "-fprofile-instr-generate"
+  - "-fcoverage-mapping"
 
 ## Paths to the fuzz targets to execute.
 fuzz_tests:
