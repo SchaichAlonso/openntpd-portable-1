@@ -197,9 +197,9 @@ start_child(char *pname, int cfd, int argc, char **argv)
 				fatal("dup2");
 		} else if (fcntl(cfd, F_SETFD, 0) == -1)
 			fatal("fcntl");
-        printf("Execute execvp: argv[0]: %s\nNargv[0]: %s\nNargv[1]: %s\nNargv[2]: %s\n", argv[0], nargv[0], nargv[1], nargv[2]);    
+        //printf("Execute execvp: argv[0]: %s\nNargv[0]: %s\nNargv[1]: %s\nNargv[2]: %s\nNargv[3]: %s\nNargv[4]: %s\nNargv[5]: %s\n", argv[0], nargv[0], nargv[1], nargv[2], nargv[3], nargv[4], nargv[5]);    
 		//execvp(argv[0], nargv);
-		execvp("/project/libfuzzer/address/src/ntpd", nargv);
+        execvp("/projects/openntpd-portable-75719cf3/libfuzzer/address/src/ntpd", nargv);
         fatal("%s: execvp", __func__);
 		break;
 
