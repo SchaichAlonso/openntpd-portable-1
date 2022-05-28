@@ -15,12 +15,16 @@ type: "socket"
 ## fuzz target.
 compiler_extra_args:
   - -Isrc
+  - -L/project/libfuzzer/address
+  - -lFuzzCIntpd
 #  - -lpthread
 
 ## Additional arguments to pass to the fuzz target when it is executed.
 ## Note that any relative paths are resolved relative to the root of the
-## project directory.
+#project directory.
 run_extra_args:
+  - -P
+  - ntp_main
   - -d
 #  - "-c myapp.conf"
 
@@ -30,8 +34,11 @@ run_extra_args:
 #    - -rss_limit_mb=4096
 
 ## Environment variables to set when executing the target.
-#environment:
-#  - ASAN_OPTIONS=detect_leaks=0
+environment:
+  - ASAN_OPTIONS=fast_unwind_on_malloc=0
+  # - ASAN_OPTIONS=detect_leaks=0
+  # - LSAN_OPTIONS=verbosity=1:log_threads=1
+
 
 ## If set to true, do not use the generic input corpus for this
 ## fuzz target.
