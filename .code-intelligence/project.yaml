@@ -79,7 +79,7 @@ max_runtime: "600m0s"
 ## The number of parallel executions per fuzz test. The default is 1,
 ## which means for each combination of fuzzing engine and sanitizer,
 ## each fuzz target is executed once.
-parallel_executions: 1
+parallel_executions: 2
 
 ## By default, fuzz targets are seeded with an initial input corpus,
 ## which consists of files of various data formats. This often improves
