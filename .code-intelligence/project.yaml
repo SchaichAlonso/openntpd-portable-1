@@ -43,7 +43,7 @@ compiler_extra_args:
 ## Paths to the fuzz targets to execute.
 fuzz_tests:
   - .code-intelligence/fuzz_targets/udp_fuzzer.cpp
-  - .code-intelligence/fuzz_targets/useless_fuzz_target.cpp
+#  - .code-intelligence/fuzz_targets/useless_fuzz_target.cpp
 
 ## Go packages containing fuzz targets. A fuzzer is created
 ## for each function starting with "Fuzz"
