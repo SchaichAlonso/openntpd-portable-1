@@ -22,7 +22,7 @@ compiler_extra_args:
 ## Additional arguments to pass to the fuzz target when it is executed.
 ## Note that any relative paths are resolved relative to the root of the
 #project directory.
-run_extra_args:
+fuzzer_run_args:
   - -P
   - ntp_main
   - -d
