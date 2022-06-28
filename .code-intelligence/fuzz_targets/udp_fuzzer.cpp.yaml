@@ -15,7 +15,7 @@ type: "socket"
 ## fuzz target.
 compiler_extra_args:
   - -Isrc
-  - -L/project/libfuzzer/address
+  - -L.
   - -lFuzzCIntpd
 #  - -lpthread
 
