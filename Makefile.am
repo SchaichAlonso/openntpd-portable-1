@@ -33,3 +33,7 @@ uninstall-local:
 		rm -f "$(DESTDIR)$(sysconfdir)/ntpd.conf"; \
 	fi
 	@rm -f "$(DESTDIR)$(sbindir)/ntpctl"
+
+fuzztest: 
+	@echo "Building $@"
+	${CXX} ${CXXFLAGS} ${FUZZ_TEST_CXXFLAGS} ${FUZZ_TEST_LDFLAGS} -o $@ $@.cpp -Wl
