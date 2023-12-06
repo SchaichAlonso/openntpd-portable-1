@@ -32,6 +32,8 @@ WORKDIR /openntpd-portable
 
 # RUN make
 
+# RUN cifuzz run fuzztest --build-command "./autogen.sh; ./configure --disable-dependency-tracking; make; make fuzztest" -v --use-sandbox=false
+
 # on ubuntu host check if /run/systemd/journal/dev-log is a socket
 # $ ls -l /run/systemd/journal/dev-log
 # srw-rw-rw- 1 root root 0 Dec 16 09:17 /run/systemd/journal/dev-log
