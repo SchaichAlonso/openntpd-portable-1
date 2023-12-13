@@ -44,7 +44,7 @@ RUN cifuzz run ntpd_fuzzer --build-only --build-command "./autogen.sh; ./configu
 
 # on host 
 # docker build . -t ntpd-env
-# docker run --cap-add SYS_TIME --cap-add SYS_NICE -v /dev/log:/dev/log -it nptd-env /openntpd-portable/run.sh
+# docker run --cap-add SYS_TIME --cap-add SYS_NICE -v /dev/log:/dev/log -it ntpd-env /openntpd-portable/run.sh
 # 
 # in container
 #./run.sh
