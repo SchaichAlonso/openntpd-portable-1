@@ -40,7 +40,7 @@ FUZZ_TEST(const uint8_t *data, size_t size) {
 
 
   int n_bytes = ::sendto(sock, msg.c_str(), msg.length(), 0, reinterpret_cast<sockaddr*>(&destination), sizeof(destination));
-  std::cout << n_bytes << " bytes sent" << std::endl;
+  //std::cout << n_bytes << " bytes sent" << std::endl;
   //::close(sock);
 
 }
