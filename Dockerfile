@@ -1,45 +1,53 @@
 FROM ubuntu
 
-RUN apt-get update && apt-get -y install git automake autoconf libtool bison gdb gdbserver nano clang llvm lcov curl make
-
 ENV TZ=Europe/Berlin
+
+# required for non-interactive installation tzdata 
 ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt -y install tzdata nscd strace
+
+RUN apt-get update -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false && apt-get -y install git automake autoconf libtool bison gdb gdbserver nano clang llvm lcov curl make tzdata nscd strace
 
 RUN mkdir /openntpd-portable
 COPY . /openntpd-portable 
 COPY ./ntpd.conf /usr/local/etc/ntpd.conf
+COPY ./ntpd.conf /etc/ntpd.conf
 
+# set up some ntpd run env requirements
 RUN groupadd _ntp
 RUN useradd -g _ntp -s /sbin/nologin -d /var/empty -c 'OpenNTP daemon' _ntp
-
 RUN mkdir -p /var/empty
 RUN chown 0 /var/empty
 RUN chgrp 0 /var/empty
 RUN chmod 0755 /var/empty
-
 RUN mkdir -p /usr/local/var/run
 
+# install pwndbg for better debugging experience
+# RUN apt-get update  -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false && apt-get install sudo gdb-multiarch gcc g++ wget cmake pkg-config binutils -y
+# RUN mkdir /pwndbg
+# RUN git clone https://github.com/pwndbg/pwndbg /pwndbg
+# RUN cd /pwndbg && ./setup.sh
 
 
-
+# install cifuzz
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/CodeIntelligenceTesting/cifuzz/main/install.sh)"
 RUN cifuzz --version
 
+# nscd required to be running by ntpd
 RUN /etc/init.d/nscd start
+
+COPY ./run.sh /openntpd-portable/run.sh
 
 WORKDIR /openntpd-portable
 
-# RUN make
+# build ntpd and fuzzer linked against libfuzzer_no_main
+RUN cifuzz run ntpd_fuzzer --build-only --build-command "./autogen.sh; ./configure --disable-dependency-tracking AM_DEFAULT_VERBOSITY=1; cp patches/ntpd.c src/ntpd.c; make; make main_hook; make fuzz_harness; make ntpd_fuzzer" -v --use-sandbox=false
 
-# RUN cifuzz run fuzztest --build-command "./autogen.sh; ./configure --disable-dependency-tracking; make; make fuzztest" -v --use-sandbox=false
-
-# on ubuntu host check if /run/systemd/journal/dev-log is a socket
-# $ ls -l /run/systemd/journal/dev-log
-# srw-rw-rw- 1 root root 0 Dec 16 09:17 /run/systemd/journal/dev-log
-#
-# sudo ln -s /run/systemd/journal/dev-log /dev/log
-#
-#  docker run --cap-add SYS_TIME --cap-add SYS_NICE -v /dev/log:/dev/log -it testimage bash
-#
-#  docker run --cap-add SYS_TIME --cap-add SYS_NICE -v /dev/log:/dev/log -it testimage /openntpd-portable/src/ntpd -d
+# on host 
+# docker build . -t ntpd-env
+# docker run --cap-add SYS_TIME --cap-add SYS_NICE -v /dev/log:/dev/log -it nptd-env /openntpd-portable/run.sh
+# 
+# in container
+#./run.sh
+# 
+# if you want to debug inside container
+# docker run --cap-add SYS_TIME --cap-add SYS_NICE --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -v /dev/log:/dev/log -it ntpd-env bash
