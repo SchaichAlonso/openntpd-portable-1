@@ -40,7 +40,7 @@ COPY ./run.sh /openntpd-portable/run.sh
 WORKDIR /openntpd-portable
 
 # build ntpd and fuzzer linked against libfuzzer_no_main
-RUN cifuzz run ntpd_fuzzer --build-only --build-command "./autogen.sh; ./configure --disable-dependency-tracking AM_DEFAULT_VERBOSITY=1; cp patches/ntpd.c src/ntpd.c; make; make main_hook; make fuzz_harness; make ntpd_fuzzer" -v --use-sandbox=false
+RUN cifuzz run ntpd_fuzzer --build-only --build-command "./autogen.sh; ./configure --disable-dependency-tracking AM_DEFAULT_VERBOSITY=1; make; make main_hook; make fuzz_harness; make ntpd_fuzzer" -v --use-sandbox=false
 
 # on host 
 # docker build . -t ntpd-env
