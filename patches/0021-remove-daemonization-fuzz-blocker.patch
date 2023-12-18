@@ -1,0 +1,59 @@
+--- a/src/usr.sbin/ntpd/ntpd.c	2023-12-18 13:53:05.704536415 +0100
++++ b/src/usr.sbin/ntpd/ntpd.c	2023-12-18 15:22:03.200549163 +0100
+@@ -284,11 +284,11 @@
+ 	logdest = lconf.debug ? LOG_TO_STDERR : LOG_TO_SYSLOG;
+ 	if (!lconf.settime) {
+ 		log_init(logdest, lconf.verbose, LOG_DAEMON);
+-		if (!lconf.debug) {
+-			if (daemon(1, 0))
+-				fatal("daemon");
+-			writepid(&lconf);
+-		}
++		// if (!lconf.debug) {
++		// 	if (daemon(1, 0))
++		// 		fatal("daemon");
++		// 	writepid(&lconf);
++		// }
+ 	} else {
+ 		settime_deadline = getmonotime();
+ 		timeout = 100;
+@@ -367,14 +367,14 @@
+ 		    getmonotime() > settime_deadline + SETTIME_TIMEOUT) {
+ 			lconf.settime = 0;
+ 			timeout = INFTIM;
+-			log_init(logdest, lconf.verbose, LOG_DAEMON);
+-			log_warnx("no reply received in time, skipping initial "
+-			    "time setting");
+-			if (!lconf.debug) {
+-				if (daemon(1, 0))
+-					fatal("daemon");
+-				writepid(&lconf);
+-			}
++			// log_init(logdest, lconf.verbose, LOG_DAEMON);
++			// log_warnx("no reply received in time, skipping initial "
++			//     "time setting");
++			// if (!lconf.debug) {
++			// 	if (daemon(1, 0))
++			// 		fatal("daemon");
++			// 	writepid(&lconf);
++			// }
+ 		}
+ 
+ 		if (nfds > 0 && (pfd[PFD_PIPE].revents & POLLOUT))
+@@ -475,11 +475,11 @@
+ 			memcpy(&d, imsg.data, sizeof(d));
+ 			ntpd_settime(d);
+ 			/* daemonize now */
+-			if (!lconf->debug) {
+-				if (daemon(1, 0))
+-					fatal("daemon");
+-				writepid(lconf);
+-			}
++			// if (!lconf->debug) {
++			// 	if (daemon(1, 0))
++			// 		fatal("daemon");
++			// 	writepid(lconf);
++			// }
+ 			lconf->settime = 0;
+ 			timeout = INFTIM;
+ 			break;
