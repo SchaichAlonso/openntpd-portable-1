@@ -43,14 +43,21 @@ int our_main(int argc, char** argv, char** envp) {
     for (int i = 0; i < argc; i++) {
         orig_argv[i] = new char[strlen(argv[i]) + 1];
         strcpy(orig_argv[i], argv[i]);
+        // helpful to debug unknown args set by cifuzz or for target 
+        // application child process
+        // std::cout << std::string(orig_argv[i]) << std::endl;
     }
 
+    // remove all args that might be set by cifuzz 
     remove_arg(argc, argv, "-max_total_time=");
     remove_arg(argc, argv, "/openntpd-portable/.cifuzz-corpus");
     remove_arg(argc, argv, "-artifact_prefix=");
     remove_arg(argc, argv, "-merge=");
-    remove_arg(argc, argv, "/tmp/llvm-coverage");
+    remove_arg(argc, argv, "/tmp");
+    remove_arg(argc, argv, "/tmp");
     remove_arg(argc, argv, "-runs=");
+    remove_arg(argc, argv, "-merge_control_file=");
+    remove_arg(argc, argv, "-merge_inner=");
     // remove_arg(argc, argv, "");
 
     if(getenv("FUZZER_RUNNING")) {
