@@ -40,18 +40,14 @@ COPY ./run.sh /openntpd-portable/run.sh
 WORKDIR /openntpd-portable
 
 # build ntpd and fuzzer linked against libfuzzer_no_main
-# RUN cifuzz run ntpd_fuzzer --build-only --build-command "./autogen.sh; ./configure --disable-dependency-tracking AM_DEFAULT_VERBOSITY=1; make; make main_hook; make fuzz_harness; make ntpd_fuzzer" -v --use-sandbox=false
-
-# build with coverage for ntpd.c
-# RUN cifuzz run ntpd_fuzzer_coverage --build-only --build-command "./autogen.sh; ./configure --disable-dependency-tracking AM_DEFAULT_VERBOSITY=1; make; make main_hook; make fuzz_harness; make ntpd_coverage; make ntpd_fuzzer_coverage" -v --use-sandbox=false
-# cifuzz coverage ntpd_fuzzer_coverage --build-command "id" -v --use-sandbox=false --format lcov
+RUN cifuzz run ntpd_fuzzer_coverage --build-only --build-command "./autogen.sh; ./configure --disable-dependency-tracking AM_DEFAULT_VERBOSITY=1; make; make main_hook; make fuzz_harness; make ntpd_coverage; make ntpd_fuzzer_coverage; make ntpd_fuzzer" -v --use-sandbox=false
 
 # on host 
 # docker build . -t ntpd-env
 # docker run --cap-add SYS_TIME --cap-add SYS_NICE -v /dev/log:/dev/log -it ntpd-env /openntpd-portable/run.sh
 # 
 # in container
-#./run.sh
+# ./run.sh
 # 
 # if you want to debug inside container
 # docker run --cap-add SYS_TIME --cap-add SYS_NICE --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -v /dev/log:/dev/log -it ntpd-env bash
