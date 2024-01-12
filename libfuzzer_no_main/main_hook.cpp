@@ -58,6 +58,7 @@ int our_main(int argc, char** argv, char** envp) {
     remove_arg(argc, argv, "-runs=");
     remove_arg(argc, argv, "-merge_control_file=");
     remove_arg(argc, argv, "-merge_inner=");
+    remove_arg(argc, argv, "-use_value_profile");
     // remove_arg(argc, argv, "");
 
     if(getenv("FUZZER_RUNNING")) {

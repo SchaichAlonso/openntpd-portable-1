@@ -19,6 +19,7 @@ sockaddr_in destination;
 
 FUZZ_TEST_SETUP() {
   // Perform any one-time setup required by the FUZZ_TEST function.
+  std::cerr << "External Fuzzer: Wait for the application to start..." << std::endl;
   std::this_thread::sleep_for(std::chrono::milliseconds(10000));
   
   std::string hostname{"172.17.0.2"};

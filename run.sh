@@ -9,13 +9,26 @@ export ASAN_OPTIONS=detect_leaks=0
 # create seed corpus dir in case it not created yet
 mkdir -p /tmp/corpus
 
-#/openntpd-portable/ntpd_fuzzer
-cifuzz run ntpd_fuzzer --build-command "id" --use-sandbox=false -v --seed-corpus /tmp/corpus
-
-# copy corpus over to mounted /tmp on host
-if cp .cifuzz-corpus/ntpd_fuzzer/* /tmp/corpus; then
-  echo "Cifuzz corpus ($(ls -la /openntpd-portable/.cifuzz-corpus/ntpd_fuzzer/* |wc -l) entries) was copied to /tmp/corpus"
+if [ "$arg" == "external" ]; then
+    #/openntpd-portable/ntpd_fuzzer_external
+    cifuzz run ntpd_fuzzer_external --build-command "id" --use-sandbox=false -v --seed-corpus /tmp/corpus
+    # for debugging
+    # LC_CTYPE=C.UTF-8 gdb --args /openntpd-portable/ntpd_fuzzer_external -d -f /etc/ntpd.conf
+    
+    # copy corpus over to mounted /tmp on host
+    if cp .cifuzz-corpus/ntpd_fuzzer_external/* /tmp/corpus; then
+        echo "Cifuzz corpus ($(ls -la /openntpd-portable/.cifuzz-corpus/ntpd_fuzzer_external/* |wc -l) entries) was copied to /tmp/corpus"
+    fi
+elif [ "$arg" == "internal" ] || [ -z "$arg" ]; then
+    #/openntpd-portable/ntpd_fuzzer_internal
+    cifuzz run ntpd_fuzzer_internal --build-command "id" --use-sandbox=false -v --seed-corpus /tmp/corpus
+    # for debugging
+    # LC_CTYPE=C.UTF-8 gdb --args /openntpd-portable/ntpd_fuzzer_internal -d -f /etc/ntpd.conf
+    
+    # copy corpus over to mounted /tmp on host
+    if cp .cifuzz-corpus/ntpd_fuzzer_internal/* /tmp/corpus; then
+        echo "Cifuzz corpus ($(ls -la /openntpd-portable/.cifuzz-corpus/ntpd_fuzzer_internal/* |wc -l) entries) was copied to /tmp/corpus"
+    fi
+else
+    echo "Usage: $0 [internal|external]"
 fi
-
-# for debugging
-# LC_CTYPE=C.UTF-8 gdb --args /openntpd-portable/ntpd_fuzzer -d -f /etc/ntpd.conf

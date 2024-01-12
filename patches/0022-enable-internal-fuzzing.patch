@@ -1,0 +1,264 @@
+--- a/src/usr.sbin/ntpd/ntpd.c	2024-01-10 10:12:29.668980027 +0100
++++ b/src/usr.sbin/ntpd/ntpd.c	2024-01-12 12:34:54.387356022 +0100
+@@ -42,6 +42,12 @@
+ 
+ #include "ntpd.h"
+ 
++#include "pthread.h"
++#include <sys/ioctl.h>
++
++pthread_mutex_t processing_input_mutex;
++uint8_t processing_input;
++
+ void		sighdlr(int);
+ __dead void	usage(void);
+ int		auto_preconditions(const struct ntpd_conf *);
+@@ -82,13 +88,13 @@
+ 	switch (sig) {
+ 	case SIGTERM:
+ 	case SIGINT:
+-		quit = 1;
++		// quit = 1;
+ 		break;
+ 	case SIGCHLD:
+-		sigchld = 1;
++		// sigchld = 1;
+ 		break;
+ 	case SIGHUP:
+-		reconfig = 1;
++		// reconfig = 1;
+ 		break;
+ 	}
+ }
+@@ -284,11 +290,13 @@
+ 	logdest = lconf.debug ? LOG_TO_STDERR : LOG_TO_SYSLOG;
+ 	if (!lconf.settime) {
+ 		log_init(logdest, lconf.verbose, LOG_DAEMON);
+-		// if (!lconf.debug) {
++		if (!lconf.debug) {
++		// daemon() leads to exit of libfuzzer threads
++		//
+ 		// 	if (daemon(1, 0))
+ 		// 		fatal("daemon");
+-		// 	writepid(&lconf);
+-		// }
++			writepid(&lconf);
++		}
+ 	} else {
+ 		settime_deadline = getmonotime();
+ 		timeout = 100;
+@@ -304,8 +312,15 @@
+ 	signal(SIGCHLD, sighdlr);
+ 
+ 	/* fork child process */
+-	start_child(NTP_PROC_NAME, pipe_chld[1], argc0, argv0);
+-
++	// start_child(NTP_PROC_NAME, pipe_chld[1], argc0, argv0);
++	
++	if (pipe_chld[1] != PARENT_SOCK_FILENO) {
++		if (dup2(pipe_chld[1], PARENT_SOCK_FILENO) == -1) {
++			fprintf(stderr, "dup2 did not work.\n");
++		}
++	} else if (fcntl(pipe_chld[1], F_SETFD, 0) == -1) {
++		fprintf(stderr, "F_SETFD did not work.\n");
++	}
+ 	log_procinit("[priv]");
+ 	readfreq();
+ 
+@@ -314,11 +329,9 @@
+ 	signal(SIGHUP, sighdlr);
+ 
+ 	constraint_purge();
+-
+ 	if ((ibuf = malloc(sizeof(struct imsgbuf))) == NULL)
+ 		fatal(NULL);
+ 	imsg_init(ibuf, pipe_chld[0]);
+-
+ 	constraint_cnt = 0;
+ 
+ 	/*
+@@ -329,8 +342,8 @@
+ 		err(1, "unveil /usr/sbin/ntpd");
+ 	if (pledge("stdio settime proc exec", NULL) == -1)
+ 		err(1, "pledge");
+-
+ 	while (quit == 0) {
++		
+ 		new_cnt = PFD_MAX + constraint_cnt;
+ 		if (new_cnt > pfd_elms) {
+ 			if ((newp = reallocarray(pfd, new_cnt,
+@@ -338,6 +351,7 @@
+ 				/* panic for now */
+ 				log_warn("could not resize pfd from %u -> "
+ 				    "%u entries", pfd_elms, new_cnt);
++				fprintf(stderr, "fatalx \n");
+ 				fatalx("exiting");
+ 			}
+ 			pfd = newp;
+@@ -357,46 +371,86 @@
+ 			i++;
+ 		}
+ 
++		pthread_mutex_lock(&processing_input_mutex);
++		processing_input = 0;
++		pthread_mutex_unlock(&processing_input_mutex);
+ 		if ((nfds = poll(pfd, i, timeout)) == -1)
+ 			if (errno != EINTR) {
++				
+ 				log_warn("poll error");
++				fprintf(stderr, "\nQUIT poll \n\n");
+ 				quit = 1;
+ 			}
+ 
++		// intercept message that was send to pipe_child[0]
++		//
++		// char bufr[100]; // buffer
++		// //int r = read(pipe_chld[0], bufr, 100);
++		// int r = recv(pipe_chld[0], bufr, 100, MSG_PEEK);
++		// fprintf(stderr, "Message:0x");
++		// for (int i = 0; i < r; i++) {
++		// 	fprintf(stderr, "%02X", (unsigned char)bufr[i]);
++		// }
++		// fprintf(stderr, "\n");
++
+ 		if (nfds == 0 && lconf.settime &&
+ 		    getmonotime() > settime_deadline + SETTIME_TIMEOUT) {
++			fprintf(stderr, "timeout=INFTIM reached.\n");
+ 			lconf.settime = 0;
+ 			timeout = INFTIM;
+-			// log_init(logdest, lconf.verbose, LOG_DAEMON);
+-			// log_warnx("no reply received in time, skipping initial "
+-			//     "time setting");
+-			// if (!lconf.debug) {
+-			// 	if (daemon(1, 0))
+-			// 		fatal("daemon");
+-			// 	writepid(&lconf);
+-			// }
++			log_init(logdest, lconf.verbose, LOG_DAEMON);
++			log_warnx("no reply received in time, skipping initial "
++			    "time setting");
++			if (!lconf.debug) {
++				fprintf(stderr, "Skipping daemonization\n");
++				// daemon() leads to exit of libfuzzer threads
++				// 
++				// if (daemon(1, 0))
++				// 	fatal("daemon");
++				writepid(&lconf);
++			}
+ 		}
+ 
+ 		if (nfds > 0 && (pfd[PFD_PIPE].revents & POLLOUT))
+ 			if (msgbuf_write(&ibuf->w) <= 0 && errno != EAGAIN) {
+ 				log_warn("pipe write error (to child)");
++				fprintf(stderr, "QUIT msgbuf_write \n\n");
+ 				quit = 1;
+ 			}
+ 
+ 		if (nfds > 0 && pfd[PFD_PIPE].revents & POLLIN) {
+ 			nfds--;
+-			if (dispatch_imsg(&lconf, argc0, argv0) == -1)
+-				quit = 1;
++			if (dispatch_imsg(&lconf, argc0, argv0) == -1) {
++				//fprintf(stderr, "QUIT after dispatch_imsg\n");
++				// target threads exits if quit is reached
++				// fuzzer quickly generate messages which reach this code
++				// quit = 1;
++			}
+ 		}
+ 
+ 		for (j = PFD_MAX; nfds > 0 && j < i; j++) {
++			fprintf(stderr, "priv_constraint_dispatch reached.\n");
+ 			nfds -= priv_constraint_dispatch(&pfd[j]);
+ 		}
+ 
+ 		if (sigchld) {
++			fprintf(stderr, "check_child reached.\n");
+ 			check_child();
+ 			sigchld = 0;
+ 		}
++		// in case recv was not called and 
++		// something is left on pipe_chld[0] 
++		//
++		// int bytes;
++		// char bufr[100];
++		// int i = ioctl(pipe_chld[0], FIONREAD, &bytes);
++		// if (i == -1) {
++		// 	fprintf(stderr, "ioctl -1\n");
++    	// }
++		// else if (i > 1) {
++		// 	read(pipe_chld[0], bufr, i);
++		// }
++		
+ 	}
+ 
+ 	signal(SIGCHLD, SIG_DFL);
+@@ -446,14 +500,19 @@
+ 	for (;;) {
+ 		if ((n = imsg_get(ibuf, &imsg)) == -1)
+ 			return (-1);
+-
++		
+ 		if (n == 0)
+ 			break;
+ 
++		// check if fuzzer is able to generate valid imsg messages 
++		// fprintf(stderr, "imsg_get passed\n");
++		
+ 		switch (imsg.hdr.type) {
+ 		case IMSG_ADJTIME:
+ 			if (imsg.hdr.len != IMSG_HEADER_SIZE + sizeof(d))
+-				fatalx("invalid IMSG_ADJTIME received");
++				// fuzzer can quickly reach this 
++				// libfuzzer fuzz target exited finding is triggered
++				//fatalx("invalid IMSG_ADJTIME received");
+ 			memcpy(&d, imsg.data, sizeof(d));
+ 			n = ntpd_adjtime(d);
+ 			imsg_compose(ibuf, IMSG_ADJTIME, 0, 0, -1,
+@@ -475,20 +534,24 @@
+ 			memcpy(&d, imsg.data, sizeof(d));
+ 			ntpd_settime(d);
+ 			/* daemonize now */
+-			// if (!lconf->debug) {
+-			// 	if (daemon(1, 0))
++			if (!lconf->debug) {
++			// daemon() leads to exit of libfuzzer threads
++			//
++			//	if (daemon(1, 0))
+ 			// 		fatal("daemon");
+-			// 	writepid(lconf);
+-			// }
++				writepid(lconf);
++			}
+ 			lconf->settime = 0;
+ 			timeout = INFTIM;
+ 			break;
+ 		case IMSG_CONSTRAINT_QUERY:
++			fprintf(stderr, "priv_constraint_msg reached.\n");
+ 			priv_constraint_msg(imsg.hdr.peerid,
+ 			    imsg.data, imsg.hdr.len - IMSG_HEADER_SIZE,
+ 			    argc, argv);
+ 			break;
+ 		case IMSG_CONSTRAINT_KILL:
++			fprintf(stderr, "priv_constraint_kill reached.\n");
+ 			priv_constraint_kill(imsg.hdr.peerid);
+ 			break;
+ 		default:
+@@ -607,7 +670,8 @@
+ 
+ 	fd = open(DRIFTFILE, O_RDWR);
+ 	if (fd == -1) {
+-		log_warnx("creating new %s", DRIFTFILE);
++		// log_warnx might write to PARENT_SOCK_FILENO 
++		//log_warnx("creating new %s", DRIFTFILE);
+ 		current = 0;
+ 		if (adjfreq(&current, NULL) == -1)
+ 			log_warn("adjfreq reset failed");
+@@ -812,7 +876,7 @@
+ 	}
+ 	close(fd);
+ 	free(ibuf_ctl);
+-	exit(0);
++	//exit(0);
+ }
+ 
+ const char *
