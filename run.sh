@@ -10,7 +10,7 @@ export ASAN_OPTIONS=detect_leaks=0
 mkdir -p /tmp/corpus
 
 #/openntpd-portable/ntpd_fuzzer
-cifuzz run ntpd_fuzzer --build-command "id" --use-sandbox=false -v --seed-corpus /tmp/corpus
+cifuzz run ntpd_fuzzer --build-command "id" -v --seed-corpus /tmp/corpus
 
 # copy corpus over to mounted /tmp on host
 if cp .cifuzz-corpus/ntpd_fuzzer/* /tmp/corpus; then
