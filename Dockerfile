@@ -7,7 +7,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false && apt-get -y install git automake autoconf libtool bison gdb gdbserver nano clang llvm lcov curl make tzdata nscd strace
 
-RUN git clone --branch cifuzz https://github.com/SchaichAlonso/openntp-portable
+RUN git clone --branch cifuzz https://github.com/SchaichAlonso/openntpd-portable
 COPY ./ntpd.conf /usr/local/etc/ntpd.conf
 COPY ./ntpd.conf /etc/ntpd.conf
 
