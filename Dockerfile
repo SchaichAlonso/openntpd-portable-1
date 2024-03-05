@@ -8,8 +8,6 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false && apt-get -y install git automake autoconf libtool bison gdb gdbserver nano clang llvm lcov curl make tzdata nscd strace
 
 RUN git clone --branch cifuzz https://github.com/SchaichAlonso/openntpd-portable
-COPY ./ntpd.conf /usr/local/etc/ntpd.conf
-COPY ./ntpd.conf /etc/ntpd.conf
 
 # set up some ntpd run env requirements
 RUN groupadd _ntp
@@ -38,9 +36,11 @@ RUN /etc/init.d/nscd start
 # COPY ./run.sh /openntpd-portable/run.sh
 
 WORKDIR /openntpd-portable
+RUN cp ./ntpd.conf /etc/ntpd.conf
+RUN cp ./ntpd.conf /usr/local/etc/ntpd.conf
 
 # build ntpd and fuzzer linked against libfuzzer_no_main
-# RUN cifuzz run ntpd_fuzzer_coverage --build-only --build-command "./autogen.sh; ./configure --disable-dependency-tracking AM_DEFAULT_VERBOSITY=1; make; make main_hook; make fuzz_harness; make ntpd_coverage; make ntpd_fuzzer_coverage; make ntpd_fuzzer" -v
+RUN cifuzz run ntpd_fuzzer_coverage --build-only --build-command "./autogen.sh; ./configure --disable-dependency-tracking AM_DEFAULT_VERBOSITY=1; make; make main_hook; make fuzz_harness; make ntpd_coverage; make ntpd_fuzzer_coverage; make ntpd_fuzzer" -v
 
 # on host 
 # docker build . -t ntpd-env
