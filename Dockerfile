@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM ubuntu:22.04
 
 ENV TZ=Europe/Berlin
 
@@ -7,8 +7,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false && apt-get -y install git automake autoconf libtool bison gdb gdbserver nano clang llvm lcov curl make tzdata nscd strace
 
-RUN mkdir /openntpd-portable
-COPY . /openntpd-portable 
+RUN git clone --branch cifuzz https://github.com/SchaichAlonso/openntp-portable
 COPY ./ntpd.conf /usr/local/etc/ntpd.conf
 COPY ./ntpd.conf /etc/ntpd.conf
 
@@ -29,18 +28,19 @@ RUN mkdir -p /usr/local/var/run
 
 
 # install cifuzz
-RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/CodeIntelligenceTesting/cifuzz/main/install.sh)"
+ADD cifuzz_installer_linux_amd64 /
+RUN chmod +x /cifuzz_installer_linux_amd64 && /cifuzz_installer_linux_amd64
 RUN cifuzz --version
 
 # nscd required to be running by ntpd
 RUN /etc/init.d/nscd start
 
-COPY ./run.sh /openntpd-portable/run.sh
+# COPY ./run.sh /openntpd-portable/run.sh
 
 WORKDIR /openntpd-portable
 
 # build ntpd and fuzzer linked against libfuzzer_no_main
-RUN cifuzz run ntpd_fuzzer_coverage --build-only --build-command "./autogen.sh; ./configure --disable-dependency-tracking AM_DEFAULT_VERBOSITY=1; make; make main_hook; make fuzz_harness; make ntpd_coverage; make ntpd_fuzzer_coverage; make ntpd_fuzzer" -v --use-sandbox=false
+# RUN cifuzz run ntpd_fuzzer_coverage --build-only --build-command "./autogen.sh; ./configure --disable-dependency-tracking AM_DEFAULT_VERBOSITY=1; make; make main_hook; make fuzz_harness; make ntpd_coverage; make ntpd_fuzzer_coverage; make ntpd_fuzzer" -v
 
 # on host 
 # docker build . -t ntpd-env
