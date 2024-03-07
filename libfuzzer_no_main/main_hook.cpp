@@ -39,37 +39,20 @@ void remove_arg(int &argc, char **argv, const char* x) {
   }
 }
 
-void write_name(int argc, char** argv) {
+void write_name(int argc, char** argv, char** envp) {
     char filename[64];
     sprintf(filename, "/tmp/ntpd.%d.pid", (int)getpid());
     FILE *f = fopen(filename, "w+");
     assert(f);
-    fprintf(f, "args=[\n");
-    for(int i=0; i<argc; ++i) {
-      fprintf(f, "\"");
-      for(char *a=argv[i]; *a; ++a) {
-        switch(*a) {
-          case '\"':
-          case '\'':
-            fprintf(f, "\\%c", *a);
-            break;
-          case '\n':
-            fprintf(f, "\\n", *a);
-            break;
-          case '\r':
-            fprintf(f, "\\r", *a);
-            break;
-          default:
-            fprintf(f, "%c", *a);
-        }
-      }
-      if(i+1 < argc) {
-        fprintf(f, "\",\n");
-      } else {
-        fprintf(f, "\"");
-      }
+    fprintf(f, "pid=%d\n", (int)getpid());
+    fprintf(f, "ppid=%d\n", (int)getppid());
+    for(int a=0; a<argc; ++a) {
+        fprintf(f, "args[%d]=%s\n", a, argv[a]);
     }
-    fprintf(f, "]\n");
+    for(int a=0; envp[a] != NULL; ++a) {
+        fprintf(f, "envp[%d]=%s\n", a, argv[a]);
+    }
+    fprintf(f, "\n");
     fclose(f);
 }
 
