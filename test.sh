@@ -1,6 +1,6 @@
-find /tmp -name '*.profraw' -exec unlink {} \;
-find /tmp -name '*.profraw' -exec unlink {} \;
-find /tmp -name '*.profdata' -exec unlink {} \;
+find /tmp -name 'ntp.*.pid' -exec rm -v {} \;
+find /tmp -name '*.profraw' -exec rm -v {} \;
+find /tmp -name '*.profdata' -exec rm -v {} \;
 
 export ASAN_OPTIONS=detect_leaks=0
 export NO_CIFUZZ=1
