@@ -57,7 +57,7 @@ void write_name(int argc, char** argv, char** envp) {
 }
 
 int our_main(int argc, char** argv, char** envp) {
-    write_name(argc, argv);
+    write_name(argc, argv, envp);
   
     // cifuzz or libfuzzer check for arguments in argv that conflict with
     // args that ntpd expects via argv. Args that are set from cifuzz or
