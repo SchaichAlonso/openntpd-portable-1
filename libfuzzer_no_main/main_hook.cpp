@@ -1,5 +1,10 @@
+#include <unistd.h>
+
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <string>
 
@@ -34,7 +39,43 @@ void remove_arg(int &argc, char **argv, const char* x) {
   }
 }
 
+void write_name(int argc, char** argv) {
+    char filename[64];
+    sprintf(filename, "/tmp/ntpd.%d.pid", (int)getpid());
+    FILE *f = fopen(filename, "w+");
+    assert(f);
+    fprintf(f, "args=[\n");
+    for(int i=0; i<argc; ++i) {
+      fprintf(f, "\"");
+      for(char *a=argv[i]; *a; ++a) {
+        switch(*a) {
+          case '\"':
+          case '\'':
+            fprintf(f, "\\%c", *a);
+            break;
+          case '\n':
+            fprintf(f, "\\n", *a);
+            break;
+          case '\r':
+            fprintf(f, "\\r", *a);
+            break;
+          default:
+            fprintf(f, "%c", *a);
+        }
+      }
+      if(i+1 < argc) {
+        fprintf(f, "\",\n");
+      } else {
+        fprintf(f, "\"");
+      }
+    }
+    fprintf(f, "]\n");
+    fclose(f);
+}
+
 int our_main(int argc, char** argv, char** envp) {
+    write_name(argc, argv);
+  
     // cifuzz or libfuzzer check for arguments in argv that conflict with
     // args that ntpd expects via argv. Args that are set from cifuzz or
     // for libfuzzer will be saved in orig_argc and orig_argv
