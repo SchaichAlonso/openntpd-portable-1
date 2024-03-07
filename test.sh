@@ -1,4 +1,4 @@
-find /tmp -name 'ntp.*.pid' -exec rm -v {} \;
+find /tmp -name 'ntpd.*.pid' -exec rm -v {} \;
 find /tmp -name '*.profraw' -exec rm -v {} \;
 find /tmp -name '*.profdata' -exec rm -v {} \;
 
