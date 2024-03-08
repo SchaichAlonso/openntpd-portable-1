@@ -18,6 +18,13 @@
 
 #include "libfuzzer_no_main/main_hook.h"
 
+#include <sys/queue.h> // used by, but not included by, <imsg.h>
+extern "C" {
+#include "include/imsg.h" // needs to be in extern C block
+
+extern struct imsgbuf *ibuf; // from ntpd.c
+}
+
 int sock;
 sockaddr_in destination;
 
