@@ -28,6 +28,27 @@ extern struct imsgbuf *ibuf; // from ntpd.c
 int sock;
 sockaddr_in destination;
 
+int cifuzz_pipe_chld[2];
+struct imsgbuf cifuzz_pipe_to_ntpd;
+
+void cifuzz_pipe_inject()
+{
+  assert(cifuzz_ntpd_is_running());
+
+  int retval = socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, PF_UNSPEC, &cifuzz_pipe_chld[0]);
+  assert(retval == 0);
+
+  memset(&cifuzz_pipe_to_ntpd, 0, sizeof(cifuzz_pipe_to_ntpd));
+
+  imsg_init(ibuf, cifuzz_pipe_chld[0]);
+  imsg_init(&cifuzz_pipe_to_ntpd, cifuzz_pipe_chld[1]);
+
+  /*
+   * Wakeup `poll`-ing ntpd
+   */
+  cifuzz_ntpd_send_sighup();
+}
+
 FUZZ_TEST_SETUP() {
   // Perform any one-time setup required by the FUZZ_TEST function.
   std::this_thread::sleep_for(std::chrono::milliseconds(10000));
@@ -40,6 +61,8 @@ FUZZ_TEST_SETUP() {
   destination.sin_family = AF_INET;
   destination.sin_port = htons(port);
   destination.sin_addr.s_addr = inet_addr(hostname.c_str());
+
+  cifuzz_pipe_inject();
 }
 
 
@@ -54,8 +77,5 @@ FUZZ_TEST(const uint8_t *data, size_t size) {
   //std::cout << n_bytes << " bytes sent" << std::endl;
   //::close(sock);
 
-  assert(cifuzz_ntpd_is_running());
-  printf("sighup!\n");
-  cifuzz_ntpd_send_sighup();
   printf("ntpd is running? %d\n", cifuzz_ntpd_is_running());
 }
