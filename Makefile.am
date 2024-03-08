@@ -34,9 +34,9 @@ uninstall-local:
 	fi
 	@rm -f "$(DESTDIR)$(sbindir)/ntpctl"
 
-main_hook: libfuzzer_no_main/main_hook.cpp
+libfuzzer_no_main/main_hook.o: libfuzzer_no_main/main_hook.cpp
 	@echo "Building $@"
-	${CXX} ${CXXFLAGS} -g -c libfuzzer_no_main/main_hook.cpp -o libfuzzer_no_main/main_hook.o 
+	${CXX} ${CXXFLAGS} -g -c $< -o $@
 
 # in case we want to rebuild target ntpd.o .... we invoke `make all`
 # src/ntpd-ntpd.o:
