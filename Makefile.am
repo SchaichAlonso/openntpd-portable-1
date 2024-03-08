@@ -48,7 +48,7 @@ src/ntpd-ntpd-coverage.o:
 
 fuzz_harness.o: fuzz_harness.cpp
 	@echo "Building $@"
-	${CXX} ${CXXFLAGS} ${FUZZ_TEST_CXXFLAGS} ${FUZZ_TEST_LDFLAGS} -g -c $@.cpp -o $@.o
+	${CXX} ${CXXFLAGS} ${FUZZ_TEST_CXXFLAGS} ${FUZZ_TEST_LDFLAGS} -g -c $< -o $@
 
 ntpd_fuzzer: fuzz_harness.o libfuzzer_no_main/main_hook.o src/ntpd-client.o src/ntpd-config.o src/ntpd-constraint-disabled.o src/ntpd-control.o src/ntpd-log.o src/ntpd-ntp.o src/ntpd-ntp_dns.o src/ntpd-ntp_msg.o src/ntpd-ntpd.o src/ntpd-parse.o src/ntpd-fake-sensors.o src/ntpd-server.o src/ntpd-util.o libfuzzer_no_main/libclang_rt.fuzzer_no_main-x86_64.a
 	@echo "Link $@"
