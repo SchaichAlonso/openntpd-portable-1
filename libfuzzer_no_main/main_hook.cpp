@@ -49,6 +49,10 @@ extern "C" {
         std::lock_guard<std::mutex> guard(__global_variable_lock);
         __ntpd_thread_is_running = is_running;
     }
+
+    void cifuzz_ntpd_send_sighup() {
+        pthread_kill(cifuzz_ntpd_get_thread_id(), SIGHUP);
+    }
 }
 
 

@@ -47,5 +47,8 @@ FUZZ_TEST(const uint8_t *data, size_t size) {
   //std::cout << n_bytes << " bytes sent" << std::endl;
   //::close(sock);
 
+  assert(cifuzz_ntpd_is_running());
+  printf("sighup!\n");
+  cifuzz_ntpd_send_sighup();
   printf("ntpd is running? %d\n", cifuzz_ntpd_is_running());
 }
