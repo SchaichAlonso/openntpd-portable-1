@@ -1,3 +1,4 @@
+#include <signal.h>
 #include <unistd.h>
 
 #include <cassert>
@@ -56,6 +57,27 @@ void write_name(int argc, char** argv, char** envp) {
     fclose(f);
 }
 
+void block_ntpd_used_signals() {
+    sigset_t set;
+    sigemptyset(&set);
+    /*
+     * https://github.com/openntpd-portable/openntpd-openbsd/blob/23fa068145b66c59340d034d3f992d891afe3f20/src/usr.sbin/ntpd/ntpd.c#L262
+     */
+    sigaddset(&set, SIGCHLD);
+    /*
+     * https://github.com/openntpd-portable/openntpd-openbsd/blob/23fa068145b66c59340d034d3f992d891afe3f20/src/usr.sbin/ntpd/ntpd.c#L270
+     */
+#if 0
+    // we need this ourselves eventually. ntpd doesn't exit(3) but returns from main, which we don't really notice (yet)
+    sigaddset(&set, SIGTERM);
+    sigaddset(&set, SIGINT);
+#endif
+    sigaddset(&set, SIGHUP);
+    
+    int retval = pthread_sigmask(SIG_BLOCK, &set, NULL);
+    assert(retval == 0);
+}
+
 int our_main(int argc, char** argv, char** envp) {
     write_name(argc, argv, envp);
   
@@ -97,6 +119,8 @@ int our_main(int argc, char** argv, char** envp) {
 
         // uncomment during debugging
         //std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+
+        block_ntpd_used_signals();
 
         std::cout << "[premain] Starting fuzzer..." << std::endl;
         return LLVMFuzzerRunDriver(&orig_argc, &orig_argv, LLVMFuzzerTestOneInput);
