@@ -10,9 +10,13 @@
 #include <netinet/in.h> // sockaddr_in
 #include <sys/types.h> // uint16_t
 #include <sys/socket.h> // socket, sendto
+#include <pthread.h>
+#include <signal.h>
 #include <unistd.h> // close
 
 #include <thread>
+
+#include "libfuzzer_no_main/main_hook.h"
 
 int sock;
 sockaddr_in destination;
@@ -43,4 +47,5 @@ FUZZ_TEST(const uint8_t *data, size_t size) {
   //std::cout << n_bytes << " bytes sent" << std::endl;
   //::close(sock);
 
+  printf("ntpd is running? %d\n", cifuzz_ntpd_is_running());
 }

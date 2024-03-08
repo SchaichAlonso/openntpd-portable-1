@@ -14,6 +14,7 @@
 #include <thread>
 
 #include <dlfcn.h>
+#include "main_hook.h"
 
 static int (*gRealMain)(int, char **, char **) = nullptr;
 
@@ -22,6 +23,34 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size);
 // Provided by libFuzzer
 extern "C" int LLVMFuzzerRunDriver(int *argc, char ***argv,
                   int (*UserCb)(const uint8_t *Data, size_t Size));
+
+pthread_t __ntpd_thread_id;
+int       __ntpd_thread_is_running = 0;
+std::mutex __global_variable_lock;
+
+extern "C" {
+    pthread_t cifuzz_ntpd_get_thread_id() {
+        std::lock_guard<std::mutex> guard(__global_variable_lock);
+        return __ntpd_thread_id;
+    }
+
+    void cifuzz_ntpd_set_thread_id(pthread_t tid) {
+        std::lock_guard<std::mutex> guard(__global_variable_lock);
+        __ntpd_thread_id = tid;
+    }
+
+    int cifuzz_ntpd_is_running() {
+        std::lock_guard<std::mutex> guard(__global_variable_lock);
+        return __ntpd_thread_is_running;
+    }
+
+    void cifuzz_ntpd_set_is_running(int is_running) {
+        std::lock_guard<std::mutex> guard(__global_variable_lock);
+        __ntpd_thread_is_running = is_running;
+    }
+}
+
+
 
 // remove arg that start with x from argv
 void remove_arg(int &argc, char **argv, const char* x) {
@@ -114,7 +143,9 @@ int our_main(int argc, char** argv, char** envp) {
         putenv("FUZZER_RUNNING=1");
 
         std::thread real_main([&]() {
+            cifuzz_ntpd_set_is_running(1);
             gRealMain(argc, argv, envp);
+            cifuzz_ntpd_set_is_running(0);
         });
 
         // uncomment during debugging
