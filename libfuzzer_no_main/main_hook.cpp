@@ -148,6 +148,7 @@ int our_main(int argc, char** argv, char** envp) {
         putenv("FUZZER_RUNNING=1");
 
         std::thread real_main([&]() {
+            cifuzz_ntpd_set_thread_id(pthread_self());
             cifuzz_ntpd_set_is_running(1);
             gRealMain(argc, argv, envp);
             cifuzz_ntpd_set_is_running(0);
