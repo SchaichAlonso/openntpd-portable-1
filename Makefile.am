@@ -34,7 +34,7 @@ uninstall-local:
 	fi
 	@rm -f "$(DESTDIR)$(sbindir)/ntpctl"
 
-libfuzzer_no_main/main_hook.o: libfuzzer_no_main/main_hook.cpp libfuzzer_no_main/main_hook.h
+libfuzzer_no_main/main_hook.o: libfuzzer_no_main/main_hook.cpp
 	@echo "Building $@"
 	${CXX} ${CXXFLAGS} -g -c $< -o $@
 
