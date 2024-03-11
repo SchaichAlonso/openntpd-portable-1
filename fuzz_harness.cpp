@@ -78,4 +78,12 @@ FUZZ_TEST(const uint8_t *data, size_t size) {
   //::close(sock);
 
   printf("ntpd is running? %d\n", cifuzz_ntpd_is_running());
+
+  double freq = 0.0;
+  imsg_compose(&cifuzz_pipe_to_ntpd, /* IMSG_ADJFREQ */ 2, 0, 0, -1, &freq, sizeof(freq));
+  while (msgbuf_write(&cifuzz_pipe_to_ntpd.w) <= 0) {
+    assert(errno == EAGAIN);
+    printf("too fast\n");
+    sleep(1);
+  }
 }
