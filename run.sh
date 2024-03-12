@@ -11,7 +11,7 @@ mkdir -p /tmp/corpus
 
 if [ "$arg" == "external" ]; then
     #/openntpd-portable/ntpd_fuzzer_external
-    cifuzz run ntpd_fuzzer_external --build-command "id" --use-sandbox=false -v --seed-corpus /tmp/corpus
+    cifuzz run ntpd_fuzzer_external --build-command "id" -v --seed-corpus /tmp/corpus
     # for debugging
     # LC_CTYPE=C.UTF-8 gdb --args /openntpd-portable/ntpd_fuzzer_external -d -f /etc/ntpd.conf
     
@@ -21,7 +21,7 @@ if [ "$arg" == "external" ]; then
     fi
 elif [ "$arg" == "internal" ] || [ -z "$arg" ]; then
     #/openntpd-portable/ntpd_fuzzer_internal
-    cifuzz run ntpd_fuzzer_internal --build-command "id" --use-sandbox=false -v --seed-corpus /tmp/corpus
+    cifuzz run ntpd_fuzzer_internal --build-command "id" -v --seed-corpus /tmp/corpus
     # for debugging
     # LC_CTYPE=C.UTF-8 gdb --args /openntpd-portable/ntpd_fuzzer_internal -d -f /etc/ntpd.conf
     

@@ -7,7 +7,7 @@ export ASAN_OPTIONS=detect_leaks=0
 if [ "$arg" == "external" ]; then
     #echo "$(ls -la /tmp/corpus| wc -l) corpus entries were found in /tmp/corpus"
     #cifuzz coverage ntpd_fuzzer_coverage_external --build-command "id" -v --use-sandbox=false --format lcov --add-corpus /tmp/corpus
-    cifuzz coverage ntpd_fuzzer_coverage_external --build-command "id" -v --use-sandbox=false --format lcov 
+    cifuzz coverage ntpd_fuzzer_coverage_external --build-command "id" -v --format lcov 
 
     # copy lcov report to /tmp on host
     if cp ntpd_fuzzer_coverage_external.coverage.lcov /tmp/lcov.info; then
@@ -15,8 +15,8 @@ if [ "$arg" == "external" ]; then
     fi
 elif [ "$arg" == "internal" ] || [ -z "$arg" ]; then
     #echo "$(ls -la /tmp/corpus| wc -l) corpus entries were found in /tmp/corpus"
-    #cifuzz coverage ntpd_fuzzer_coverage_internal --build-command "id" -v --use-sandbox=false --format lcov --add-corpus /tmp/corpus
-    cifuzz coverage ntpd_fuzzer_coverage_internal --build-command "id" -v --use-sandbox=false --format lcov 
+    cifuzz coverage ntpd_fuzzer_coverage_internal --build-command "id" -v --format lcov --add-corpus /tmp/corpus
+    #cifuzz coverage ntpd_fuzzer_coverage_internal --build-command "id" --format lcov 
 
     # copy lcov report to /tmp on host
     if cp ntpd_fuzzer_coverage_internal.coverage.lcov /tmp/lcov.info; then

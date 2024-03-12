@@ -4,7 +4,7 @@ find /tmp -name '*.profdata' -exec rm -v {} \;
 
 export ASAN_OPTIONS=detect_leaks=0
 export NO_CIFUZZ=1
-export LLVM_PROFILE_FILE='/tmp/ntpd_fuzzer_coverage.%p.profraw'
+export LLVM_PROFILE_FILE='/tmp/ntpd_fuzzer_coverage_internal.%p.profraw'
 FUZZ_TARGET=/openntpd-portable/ntpd_fuzzer_coverage_internal
 
 ${FUZZ_TARGET} -runs=1000
