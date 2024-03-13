@@ -21,6 +21,7 @@
 #include <sys/queue.h> // used by, but not included by, <imsg.h>
 extern "C" {
 #include "include/imsg.h" // needs to be in extern C block
+#include "src/ntpd.h" // for IMSG_ADJFREQ and friends
 
 extern struct imsgbuf *ibuf; // from ntpd.c
 }
@@ -89,6 +90,19 @@ FUZZ_TEST(const uint8_t *data, size_t size) {
     // this is unit test material.
     return;
   }
+
+swtich (imsg_type) {
+  case IMSG_ADJTIME:
+  case IMSG_ADJFREQ:
+  case IMSG_SETTIME:
+    if (imsg_data.size() < sizeof(double)) {
+      return;
+    }
+    imsg_data.resize(sizeof(double));
+    break;
+  default:
+    break;
+}
 
 #if 0
   double freq = 0.0;
