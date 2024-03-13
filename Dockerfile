@@ -5,7 +5,7 @@ ENV TZ=Europe/Berlin
 # required for non-interactive installation tzdata 
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false && apt-get -y install git automake autoconf libtool bison gdb gdbserver nano clang llvm lcov curl make tzdata nscd strace
+RUN apt-get update -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false && apt-get -y install git automake autoconf libtool bison gdb gdbserver nano clang lldb llvm lcov curl make tzdata nscd strace
 
 RUN git clone --branch cifuzz-original https://github.com/SchaichAlonso/openntpd-portable-1 openntpd-portable
 
