@@ -21,7 +21,6 @@
 #include <sys/queue.h> // used by, but not included by, <imsg.h>
 extern "C" {
 #include "include/imsg.h" // needs to be in extern C block
-#include "src/ntpd.h" // for IMSG_ADJFREQ and friends
 
 extern struct imsgbuf *ibuf; // from ntpd.c
 }
@@ -92,9 +91,9 @@ FUZZ_TEST(const uint8_t *data, size_t size) {
   }
 
 swtich (imsg_type) {
-  case IMSG_ADJTIME:
-  case IMSG_ADJFREQ:
-  case IMSG_SETTIME:
+  case 1: /* IMSG_ADJTIME */
+  case 2: /* IMSG_ADJFREQ */
+  case 3: /* IMSG_SETTIME */
     if (imsg_data.size() < sizeof(double)) {
       return;
     }

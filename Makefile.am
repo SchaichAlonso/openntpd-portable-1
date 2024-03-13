@@ -42,9 +42,9 @@ src/ntpd-ntpd-coverage.o: src/ntpd.c
 	@echo "Building $@"
 	${CC} -g -DSPT_TYPE=SPT_REUSEARGV -DHAVE_ARC4RANDOM=1 -DHAVE_ARC4RANDOM_BUF=1 -DHAVE_ARC4RANDOM_UNIFORM=1 -DHAVE_EXPLICIT_BZERO=1 -DHAVE_GETAUXVAL=1 -DHAVE_ASPRINTF=1 -DHAVE_CLOSEFROM=1 -DHAVE_DAEMON=1 -DHAVE_MEMMEM=1 -DHAVE_POLL=1 -DHAVE_REALLOCARRAY=1 -DHAVE_SETGROUPS=1 -DHAVE_SETREGID=1 -DHAVE_SETRESGID=1 -DHAVE_SETREUID=1 -DHAVE_SETRESUID=1 -DHAVE_SYSCONF=1 -DHAVE_NTP_ADJTIME=1 -DHAVE_ADJTIMEX=1 -DHAVE_CLOCK_GETTIME=1 -DHAVE_CLOCK_GETRES=1 -DHAVE___PROGNAME=1 -DHAVE_VA_COPY=1 -DHAVE___VA_COPY=1 -DHAVE_ERR_H=1 -DHAVE_IFADDRS_H=1 -DHAVE_PATHS_H=1 -DNTPD_USER=\"_ntp\" -DCONSTRAINT_CA=\"/etc/ssl/cert.pem\" -Isrc  -Iinclude -DYYSTYPE_IS_DECLARED -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_POSIX_SOURCE -D_GNU_SOURCE -fPIC -fsanitize=fuzzer-no-link -fsanitize=address -fprofile-instr-generate -fcoverage-mapping -c src/ntpd.c -o src/ntpd-ntpd-coverage.o
 
-fuzz_harness.o: fuzz_harness.cpp libfuzzer_no_main/main_hook.h include/imsg.h src/ntpd.h
+fuzz_harness.o: fuzz_harness.cpp libfuzzer_no_main/main_hook.h include/imsg.h
 	@echo "Building $@"
-	${CXX} ${CXXFLAGS} ${FUZZ_TEST_CXXFLAGS} ${FUZZ_TEST_LDFLAGS} -Iinclude -Isrc -g -c $< -o $@
+	${CXX} ${CXXFLAGS} ${FUZZ_TEST_CXXFLAGS} ${FUZZ_TEST_LDFLAGS} -g -c $< -o $@
 
 ntpd_fuzzer: fuzz_harness.o libfuzzer_no_main/main_hook.o src/ntpd-client.o src/ntpd-config.o src/ntpd-constraint-disabled.o src/ntpd-control.o src/ntpd-log.o src/ntpd-ntp.o src/ntpd-ntp_dns.o src/ntpd-ntp_msg.o src/ntpd-ntpd.o src/ntpd-parse.o src/ntpd-fake-sensors.o src/ntpd-server.o src/ntpd-util.o libfuzzer_no_main/libclang_rt.fuzzer_no_main-x86_64.a
 	@echo "Link $@"
