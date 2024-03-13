@@ -77,7 +77,7 @@ FUZZ_TEST(const uint8_t *data, size_t size) {
   //std::cout << n_bytes << " bytes sent" << std::endl;
   //::close(sock);
 
-  printf("ntpd is running? %d\n", cifuzz_ntpd_is_running());
+  assert(cifuzz_ntpd_is_running());
 
   double freq = 0.0;
   imsg_compose(&cifuzz_pipe_to_ntpd, /* IMSG_ADJFREQ */ 2, 0, 0, -1, &freq, sizeof(freq));
