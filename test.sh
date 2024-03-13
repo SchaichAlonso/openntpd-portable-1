@@ -9,6 +9,6 @@ find /tmp -name 'ntpd.*.pid' -exec rm -v {} \;
 find /tmp -name "${FUZZ_TARGET}.*.profraw" -exec rm -v {} \;
 find /tmp -name "${FUZZ_TARGET}.profdata" -exec rm -v {} \;
 
-${FUZZ_TARGET_PATH} -runs=1000
+${FUZZ_TARGET_PATH} -runs=5000
 llvm-profdata merge -sparse /tmp/${FUZZ_TARGET}.*.profraw -o /tmp/${FUZZ_TARGET}.profdata
 llvm-cov report ${FUZZ_TARGET} -instr-profile=/tmp/${FUZZ_TARGET}.profdata
