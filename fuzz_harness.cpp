@@ -90,7 +90,7 @@ FUZZ_TEST(const uint8_t *data, size_t size) {
     return;
   }
 
-swtich (imsg_type) {
+switch (imsg_type) {
   case 1: /* IMSG_ADJTIME */
   case 2: /* IMSG_ADJFREQ */
   case 3: /* IMSG_SETTIME */
