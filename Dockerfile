@@ -38,7 +38,7 @@ RUN /etc/init.d/nscd start
 
 # build ntpd and fuzzer linked against libfuzzer_no_main
 #RUN cifuzz run ntpd_fuzzer_external --build-only --build-command "./autogen.sh; ./configure --disable-dependency-tracking AM_DEFAULT_VERBOSITY=1; make; make main_hook; make ntpd_coverage; make fuzzer_external; make fuzzer_internal" -v
-RUN cifuzz run ntpd_fuzzer_internal --build-only --build-command 'export CFLAGS="${CFLAGS} -fprofile-instr-generate -fcoverage-mapping"; env; ./autogen.sh; ./configure --disable-dependency-tracking AM_DEFAULT_VERBOSITY=1; make V=1 all fuzzer_internal' -v
+RUN sh -x build.sh
 
 # on host 
 # docker build . -t ntpd-env
