@@ -3,7 +3,7 @@ FUZZ_TARGET_PATH=/openntpd-portable/ntpd_fuzzer_coverage_internal
 
 export ASAN_OPTIONS=detect_leaks=0
 export NO_CIFUZZ=1
-export LLVM_PROFILE_FILE='/tmp/${FUZZ_TARGET}.%p.profraw'
+export LLVM_PROFILE_FILE=/tmp/${FUZZ_TARGET}.%p.profraw
 
 find /tmp -name 'ntpd.*.pid' -exec rm -v {} \;
 find /tmp -name "${FUZZ_TARGET}.*.profraw" -exec rm -v {} \;
