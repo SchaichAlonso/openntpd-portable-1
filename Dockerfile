@@ -40,7 +40,7 @@ RUN cp ./ntpd.conf /etc/ntpd.conf
 RUN cp ./ntpd.conf /usr/local/etc/ntpd.conf
 
 # build ntpd and fuzzer linked against libfuzzer_no_main
-RUN cifuzz run ntpd_fuzzer_coverage --build-only --build-command 'export CFLAGS="${CFLAGS} -fprofile-instr-generate -fcoverage-mapping"; env; ./autogen.sh; ./configure --disable-dependency-tracking AM_DEFAULT_VERBOSITY=1; make V=1 all ntpd_fuzzer_coverage ntpd_fuzzer' -v
+RUN sh build.sh
 
 # on host 
 # docker build . -t ntpd-env
