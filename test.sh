@@ -6,6 +6,7 @@ find /tmp -name "${FUZZ_TARGET}.*.profraw" -exec rm -v {} \;
 find /tmp -name "${FUZZ_TARGET}.profdata" -exec rm -v {} \;
 
 export ASAN_OPTIONS=detect_leaks=0
+export UBSAN_OPTIONS=silence_unsigned_overflow=1
 export NO_CIFUZZ=1
 export LLVM_PROFILE_FILE=/tmp/${FUZZ_TARGET}.%p.profraw
 
