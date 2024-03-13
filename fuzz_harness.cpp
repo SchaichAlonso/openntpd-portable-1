@@ -79,8 +79,23 @@ FUZZ_TEST(const uint8_t *data, size_t size) {
 
   assert(cifuzz_ntpd_is_running());
 
+  int imsg_type = fuzzed_data.ConsumeIntegral<int>();
+  int imsg_id = 0; /* fuzz? */
+  pid_t imsg_pid = 0; /* don't touch */
+  int imsg_fd = -1; /* don't touch */
+  std::vector<uint8_t> imsg_data = fuzzed_data.ConsumeRemainingBytes<uint8_t>();
+
+  if (imsg_data.size() == 0) {
+    // this is unit test material.
+    return;
+  }
+
+#if 0
   double freq = 0.0;
   imsg_compose(&cifuzz_pipe_to_ntpd, /* IMSG_ADJFREQ */ 2, 0, 0, -1, &freq, sizeof(freq));
+#else
+  imsg_compose(&cifuzz_pipe_to_ntpd, imsg_type, imsg_id, imsg_pid, imsg_fd, &imsg_data[0], imsg_data.size());
+#endif
   while (msgbuf_write(&cifuzz_pipe_to_ntpd.w) <= 0) {
     assert(errno == EAGAIN);
     printf("too fast\n");
