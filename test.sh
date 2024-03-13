@@ -10,5 +10,5 @@ export NO_CIFUZZ=1
 export LLVM_PROFILE_FILE='/tmp/${FUZZ_TARGET}.%p.profraw'
 
 ${FUZZ_TARGET_PATH} -runs=1000
-llvm-profdata merge -sparse /tmp/${FUZZTARGET}.*.profraw -o /tmp/${FUZZTARGET}.profdata
-llvm-cov report ${FUZZ_TARGET} -instr-profile=/tmp/${FUZZTARGET}.profdata
+llvm-profdata merge -sparse /tmp/${FUZZ_TARGET}.*.profraw -o /tmp/${FUZZ_TARGET}.profdata
+llvm-cov report ${FUZZ_TARGET} -instr-profile=/tmp/${FUZZ_TARGET}.profdata
