@@ -1,5 +1,5 @@
 FUZZ_TARGET=ntpd_fuzzer_coverage
-FUZZ_TARGET_PATH=./ntpd_fuzzer_coverage
+FUZZ_TARGET_PATH=$(pwd)/ntpd_fuzzer_coverage
 
 find /tmp -name 'ntpd.*.pid' -exec rm -v {} \;
 find /tmp -name "${FUZZ_TARGET}.*.profraw" -exec rm -v {} \;
