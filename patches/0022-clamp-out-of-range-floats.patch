@@ -1,0 +1,24 @@
+--- /src/usr.sbin/ntpd/util.c
++++ /src/usr.sbin/ntpd/util.c
+@@ -75,6 +75,8 @@
+ void
+ d_to_tv(double d, struct timeval *tv)
+ {
++	d = (0 < d)? d : 0;
++	d = (d < INT32_MAX)? d : INT32_MAX;
+ 	tv->tv_sec = d;
+ 	tv->tv_usec = (d - tv->tv_sec) * 1000000;
+ 	while (tv->tv_usec < 0) {
+--- /src/usr.sbin/ntpd/ntpd.c
++++ /src/usr.sbin/ntpd/ntpd.c
+@@ -539,6 +539,10 @@
+ 	double ppmfreq;
+ 	int r;
+ 
++	double factor = 1e9 * (1LL << 32);
++	relfreq = (INT64_MIN < factor * relfreq)? relfreq : (INT64_MIN / factor + 1);
++	relfreq = (factor * relfreq < INT64_MAX)? relfreq : (INT64_MAX / factor - 1);
++
+ 	if (adjfreq(NULL, &curfreq) == -1) {
+ 		log_warn("adjfreq failed");
+ 		return;
