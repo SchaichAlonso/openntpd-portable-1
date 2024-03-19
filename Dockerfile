@@ -1,13 +1,14 @@
 FROM ubuntu:22.04
 
 ENV TZ=Europe/Berlin
+ARG CIFUZZ_TOKEN
 
 # required for non-interactive installation tzdata 
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false && apt-get -y install git automake autoconf libtool bison gdb gdbserver nano clang lldb llvm lcov curl make tzdata nscd strace
 
-RUN git clone --branch cifuzz-original https://github.com/SchaichAlonso/openntpd-portable-1 openntpd-portable
+RUN git clone --branch cifuzz-2nd-approach git@github.com:CodeIntelligenceTesting/openntpd-portable.git openntpd-portable
 
 # set up some ntpd run env requirements
 RUN groupadd _ntp
@@ -26,8 +27,7 @@ RUN mkdir -p /usr/local/var/run
 
 
 # install cifuzz
-ADD cifuzz_installer_linux_amd64 /
-RUN chmod +x /cifuzz_installer_linux_amd64 && /cifuzz_installer_linux_amd64
+RUN sh -c "$(curl -fsSL https://downloads.code-intelligence.com/assets/install.sh)" $CIFUZZ_TOKEN
 RUN cifuzz --version
 
 # nscd required to be running by ntpd
