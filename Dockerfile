@@ -8,7 +8,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false && apt-get -y install git automake autoconf libtool bison gdb gdbserver nano clang lldb llvm lcov curl make tzdata nscd strace
 
-RUN git clone --branch cifuzz-2nd-approach git@github.com:CodeIntelligenceTesting/openntpd-portable.git openntpd-portable
+RUN git clone --branch cifuzz-2nd-approach https://github.com/CodeIntelligenceTesting/openntpd-portable.git openntpd-portable
 
 # set up some ntpd run env requirements
 RUN groupadd _ntp
