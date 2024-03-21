@@ -1,9 +1,10 @@
 --- /src/usr.sbin/ntpd/util.c
 +++ /src/usr.sbin/ntpd/util.c
-@@ -75,6 +75,8 @@
+@@ -75,6 +75,9 @@
  void
  d_to_tv(double d, struct timeval *tv)
  {
++	// Patch for fuzzing in order to continue otherwise we get an float cast overflow
 +	d = (0 < d)? d : 0;
 +	d = (d < INT32_MAX)? d : INT32_MAX;
  	tv->tv_sec = d;
@@ -11,10 +12,11 @@
  	while (tv->tv_usec < 0) {
 --- /src/usr.sbin/ntpd/ntpd.c
 +++ /src/usr.sbin/ntpd/ntpd.c
-@@ -539,6 +539,10 @@
+@@ -539,6 +539,11 @@
  	double ppmfreq;
  	int r;
  
++	// Patch for fuzzing in order to continue otherwise we get an float cast overflow
 +	double factor = 1e9 * (1LL << 32);
 +	relfreq = (INT64_MIN < factor * relfreq)? relfreq : (INT64_MIN / factor + 1);
 +	relfreq = (factor * relfreq < INT64_MAX)? relfreq : (INT64_MAX / factor - 1);
