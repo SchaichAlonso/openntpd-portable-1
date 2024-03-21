@@ -1,32 +1,27 @@
-#include <assert.h>
-
 #include <cifuzz/cifuzz.h>
 #include <fuzzer/FuzzedDataProvider.h>
 
-#include <iostream>
-#include <string>
-
 #include <arpa/inet.h> // htons, inet_addr
 #include <netinet/in.h> // sockaddr_in
-#include <sys/types.h> // uint16_t
+#include <sys/queue.h> // used by, but not included by, <imsg.h>
 #include <sys/socket.h> // socket, sendto
+#include <sys/types.h> // uint16_t
 #include <pthread.h>
 #include <signal.h>
 #include <unistd.h> // close
 
+#include <cassert>
+#include <iostream>
+#include <string>
 #include <thread>
 
 #include "libfuzzer_no_main/main_hook.h"
 
-#include <sys/queue.h> // used by, but not included by, <imsg.h>
 extern "C" {
 #include "include/imsg.h" // needs to be in extern C block
 
 extern struct imsgbuf *ibuf; // from ntpd.c
 }
-
-int sock;
-sockaddr_in destination;
 
 int cifuzz_pipe_chld[2];
 struct imsgbuf cifuzz_pipe_to_ntpd;
@@ -52,15 +47,6 @@ void cifuzz_pipe_inject()
 FUZZ_TEST_SETUP() {
   // Perform any one-time setup required by the FUZZ_TEST function.
   std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-  
-  std::string hostname{"172.17.0.2"};
-  uint16_t port = 123;
-
-  sock = ::socket(AF_INET, SOCK_DGRAM, 0);
-
-  destination.sin_family = AF_INET;
-  destination.sin_port = htons(port);
-  destination.sin_addr.s_addr = inet_addr(hostname.c_str());
 
   cifuzz_pipe_inject();
 }
@@ -70,12 +56,6 @@ FUZZ_TEST_SETUP() {
 FUZZ_TEST(const uint8_t *data, size_t size) {
   
   FuzzedDataProvider fuzzed_data(data, size);
-  std::string msg = fuzzed_data.ConsumeRandomLengthString();
-
-
-  int n_bytes = ::sendto(sock, msg.c_str(), msg.length(), 0, reinterpret_cast<sockaddr*>(&destination), sizeof(destination));
-  //std::cout << n_bytes << " bytes sent" << std::endl;
-  //::close(sock);
 
   assert(cifuzz_ntpd_is_running());
 
@@ -90,25 +70,21 @@ FUZZ_TEST(const uint8_t *data, size_t size) {
     return;
   }
 
-switch (imsg_type) {
-  case 1: /* IMSG_ADJTIME */
-  case 2: /* IMSG_ADJFREQ */
-  case 3: /* IMSG_SETTIME */
-    if (imsg_data.size() < sizeof(double)) {
-      return;
-    }
-    imsg_data.resize(sizeof(double));
-    break;
-  default:
-    break;
-}
+  switch (imsg_type) {
+    case 1: /* IMSG_ADJTIME */
+    case 2: /* IMSG_ADJFREQ */
+    case 3: /* IMSG_SETTIME */
+      if (imsg_data.size() < sizeof(double)) {
+        return;
+      }
+      imsg_data.resize(sizeof(double));
+      break;
+    default:
+      break;
+  }
 
-#if 0
-  double freq = 0.0;
-  imsg_compose(&cifuzz_pipe_to_ntpd, /* IMSG_ADJFREQ */ 2, 0, 0, -1, &freq, sizeof(freq));
-#else
   imsg_compose(&cifuzz_pipe_to_ntpd, imsg_type, imsg_id, imsg_pid, imsg_fd, &imsg_data[0], imsg_data.size());
-#endif
+
   while (msgbuf_write(&cifuzz_pipe_to_ntpd.w) <= 0) {
     assert(errno == EAGAIN);
     printf("too fast\n");
